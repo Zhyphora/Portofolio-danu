@@ -31,7 +31,6 @@ export default function Home() {
       <Layout>
         <div className="h-full w-full flex flex-col items-center justify-center overflow-x-auto overflow-y-hidden">
           <Terminal onBannerComplete={handleBannerComplete} />
-          <FloatingButton />
           <AnimatePresence>
             {showContent && (
               <motion.div
@@ -42,6 +41,7 @@ export default function Home() {
                 className="w-full h-auto lg:px-24"
               >
                 <div className="max-w-4xl mx-auto">
+                  <FloatingButton />
                   <div>
                     <About />
                   </div>

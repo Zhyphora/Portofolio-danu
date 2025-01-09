@@ -74,7 +74,7 @@ export default function FloatingButton() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 flex flex-col items-end space-y-2">
+    <div className="fixed bottom-4 right-4 flex flex-col items-end space-y-2 z-10">
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
