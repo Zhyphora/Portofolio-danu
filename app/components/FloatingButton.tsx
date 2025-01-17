@@ -148,7 +148,7 @@ export default function FloatingButton() {
   return (
     <>
       {/* Left Floating Button (Music Player) */}
-      <div className="fixed bottom-4 left-4 flex flex-col items-start space-y-2 z-10">
+      <div className="fixed bottom-4 left-4 flex flex-col items-start space-y-2 z-40">
         <AnimatePresence>
           {isMusicOpen && (
             <motion.div
@@ -178,7 +178,7 @@ export default function FloatingButton() {
       </div>
 
       {/* Right Floating Buttons (Chat and Back to Top) */}
-      <div className="fixed bottom-4 right-4 flex flex-col items-end space-y-2 z-10">
+      <div className="fixed bottom-4 right-4 flex flex-col items-end space-y-2 z-40">
         <AnimatePresence>
           {isChatOpen && (
             <motion.div
