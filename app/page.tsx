@@ -40,6 +40,7 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.5 }}
                 className="w-full h-auto lg:px-24"
               >
+                <FloatingButton />
                 <div className="max-w-4xl mx-auto">
                   <FloatingButton />
                   <div>
