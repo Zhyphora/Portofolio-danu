@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
-
-//nextjs components
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
-//local components
 import Layout from "@/app/components/Layout";
 import Terminal from "@/app/components/Terminal/Terminal";
 import FloatingButton from "@/app/components/FloatingButton";
@@ -13,24 +11,31 @@ import About from "@/app/components/About";
 import Experiences from "@/app/components/Experiences";
 import Projects from "@/app/components/Projects";
 import Footer from "@/app/components/Footer";
-
-//framer motion components
-import { motion, AnimatePresence } from "framer-motion";
-
-//shadcnui components
+import Navbar from "@/app/components/Navbar";
 
 export default function Home() {
   const [showContent, setShowContent] = useState(false);
+  const [terminalHeight, setTerminalHeight] = useState(0);
+  const terminalRef = useRef<HTMLDivElement>(null);
 
   const handleBannerComplete = () => {
     setShowContent(true);
   };
 
+  useEffect(() => {
+    if (terminalRef.current) {
+      setTerminalHeight(terminalRef.current.offsetHeight);
+    }
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#10151D] xl:px-44 lg:flex lg:flex-col lg:items-center lg:justify-center">
       <Layout>
+        <Navbar terminalHeight={terminalHeight} />
         <div className="h-full w-full flex flex-col items-center justify-center overflow-x-auto overflow-y-hidden">
-          <Terminal onBannerComplete={handleBannerComplete} />
+          <div ref={terminalRef}>
+            <Terminal onBannerComplete={handleBannerComplete} />
+          </div>
           <AnimatePresence>
             {showContent && (
               <motion.div
@@ -43,13 +48,13 @@ export default function Home() {
                 <FloatingButton />
                 <div className="max-w-4xl mx-auto">
                   <FloatingButton />
-                  <div>
+                  <div id="about">
                     <About />
                   </div>
-                  <div>
+                  <div id="experiences">
                     <Experiences />
                   </div>
-                  <div>
+                  <div id="projects">
                     <Projects />
                   </div>
                 </div>

@@ -1,29 +1,44 @@
+// About.tsx
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { HiSparkles } from "react-icons/hi2";
 import { FaRegCommentDots } from "react-icons/fa"; // Icons for the hover effects
-
-type AboutMe = {
-  id: number;
-  heading: any;
-  description: string;
-};
-
-const aboutMe: AboutMe[] = [
-  {
-    id: 1,
-    heading: (
-      <>
-        Howdy! <span className="font-bold text-white">Naufal Syarif</span> here.
-      </>
-    ),
-    description:
-      "I'm currently a third-year Informatics student at Multimedia Nusantara University. Lately, I've been focusing on my studies while also offering website-building services on platforms like Fiverr. \n\nUpon graduation, I aim to start my own business within the tech field, combining my passion for software development and entrepreneurship.\n\nI'm always open to connecting and collaborating, so feel free to reach out! 🙌",
-  },
-];
+import { aboutData } from "@/app/data/about";
+import type { About } from "@/app/data/about"; // Change to type-only import
 
 export default function About() {
+  const [aboutMe, setAboutMe] = useState<About[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Simulate fetching data from an API
+  useEffect(() => {
+    const fetchData = async () => {
+      // Simulate a delay for API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Set the data (simulating API response)
+      setAboutMe(aboutData);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full h-auto mt-12 mb-4 lg:ml-[-1.25em] flex justify-start items-center space-x-2 text-white text-3xl">
+        <div className={"text-[#10B981]"}>
+          <HiOutlineExclamationCircle />
+        </div>
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="w-full h-auto mt-12 mb-4 lg:ml-[-1.25em] flex justify-start items-center space-x-2 text-white text-3xl">

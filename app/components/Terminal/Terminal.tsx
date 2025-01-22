@@ -8,9 +8,7 @@ import React, {
   KeyboardEvent,
 } from "react";
 import { motion } from "framer-motion";
-
-// importing terminal commands
-import { help } from "@/app/components/Terminal/commands";
+import { handleCommand, banner, initialMessage } from "../../data/commands"; // Import initialMessage
 import styles from "@/app/components/Terminal/Terminal.module.css";
 
 interface HistoryItem {
@@ -21,40 +19,6 @@ interface HistoryItem {
 interface TerminalProps {
   onBannerComplete?: () => void;
 }
-
-const initialMessage = `Booting up the terminal ...
-Loading the system ...
-
-Loading initial ramdisk ...
-
-[    0.000000]   Website version 0.0.0.1 (buildd@nextjs) (tailwindcss@3.3.3) (shadcnui) Mon Sep 02 09:24:07 2024
-[    0.000000]   Command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-42-generic root=UUID=abcd1234 ro quiet splash
-[    0.000000]   AMD AuthenticAMD
-...
-[    0.246920] ACPI: Core revision 20200120
-...
-[ OK ] Started GNOME Display Manager.
-[ OK ] Reached target Graphical Interface.
-
-Personal Website 0.0.0.1 LTS
-
-my-machine login: visitor
-`;
-
-const banner = `Naufal Syarif, All rights reserved.
-
-           _   _              __      _    _____                  _  __              
-          | \\ | |            / _|    | |  / ____|                (_)/ _|             
-          |  \\| | __ _ _   _| |_ __ _| | | (___  _   _  __ _ _ __| | |_            
-          | . \` |/ _\` | | | |  _/ _\` | |  \\___ \\| | | |/ _\` | '__| |  _|      
-          | |\\  | (_| | |_| | || (_| | |  ____) | |_| | (_| | |  | | |            
-          |_| \\_|\\__,_|\\__,_|_| \\__,_|_| |_____/ \\__, |\\__,_|_|  |_|_|
-                                                  __/ |
-                                                  |___/                           
-
-Welcome to my personal website.
-For a list of available commands, type 'help'.
-`;
 
 export default function Terminal({ onBannerComplete }: TerminalProps) {
   const [terminalInput, setTerminalInput] = useState("");
@@ -72,7 +36,7 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
   const handleEnter = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleCommand(terminalInput);
+      executeCommand(terminalInput);
       setTerminalInput("");
       if (inputRef.current) {
         inputRef.current.textContent = "";
@@ -80,41 +44,15 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
     }
   };
 
-  // Handle commands
-  const handleCommand = (command: string) => {
+  const executeCommand = (command: string) => {
     if (isTyping) return; // Prevent multiple commands at once
 
-    const args = command.trim().split(" ");
-    let output = "";
-
-    switch (args[0]) {
-      case "whois":
-        output =
-          "Hello guys! I'm a Software Development Enthusiast. Currently, I'm a 3rd year informatics student \nat Universitas Multimedia Nusantara. I am incredibly interested in front-end, creative, full-stack, \nand IT Security development. All I am interested in are web, mobile applications, and cyber-security. \nI am currently looking for some opportunities to work with a team. 😍";
-        break;
-      case "projects":
-        output = "1. Project A\n2. Project B\n3. Project C";
-        break;
-      case "social":
-        output =
-          "LinkedIn: https://linkedin.com/in/naufal\nGitHub: https://github.com/naufal";
-        break;
-      case "clear":
-        setHistory([]);
-        return;
-      case "banner":
-        output = banner;
-        break;
-      case "help":
-        output =
-          "Available commands: whois, projects, social, banner, clear, help";
-        break;
-      case "su":
-        output = "it doesn't do anything now, but it will be soon. 😏";
-        break;
-      default:
-        output = "Command not found. Type 'help' to see available commands.";
+    if (command.trim() === "clear") {
+      setHistory([]);
+      return;
     }
+
+    const output = handleCommand(command); // Use the handleCommand function from commands.ts
 
     // Simulate typing animation
     setIsTyping(true);
@@ -210,11 +148,10 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
         scale: showFullTerminal ? 1 : 0.95,
       }}
       transition={{ duration: 1, ease: "easeInOut" }}
-      className="min-h-64 max-h-auto w-full p-4 border-[2px] border-[#273344] text-slate-200  
-        rounded-xl font-mono text-md"
+      className="w-full max-w-full p-4 bg-[#131821] border-[2px] border-[#273344] text-slate-200 rounded-xl font-mono text-md"
       onClick={focusInput}
     >
-      <div className="bg-[#10151D] text-slate-200 font-mono text-md p-4">
+      <div className="bg-[#131821] text-slate-200 font-mono text-md p-4">
         <div className="flex items-center mb-3 space-x-2">
           <div className="w-3 h-3 bg-[#FF6059] rounded-full"></div>
           <div className="w-3 h-3 bg-[#FFBE2F] rounded-full"></div>
@@ -223,7 +160,11 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
         <div className="w-full flex items-center justify-center mb-4">
           visitor@naufal.me:~$
         </div>
-        <div className="terminal" ref={terminalRef}>
+        <div
+          className="terminal overflow-x-auto"
+          ref={terminalRef}
+          style={{ maxWidth: "100%" }}
+        >
           <div className={`${styles.terminalOutput} ${styles.scrollbar}`}>
             {history.map((item, index) => (
               <div
@@ -233,7 +174,7 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
                 }`}
               >
                 {item.type === "output" ? (
-                  <pre>{item.content}</pre>
+                  <pre className="whitespace-pre">{item.content}</pre>
                 ) : (
                   item.content
                     .split("\n")

@@ -1,101 +1,9 @@
-//react functions
-import { useState } from "react";
-
-//lucide react components
+// Experiences.tsx
+import { useState, useEffect } from "react";
 import { CalendarDays, Briefcase, GraduationCap } from "lucide-react";
-
-//react icons
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
-
-type Experience = {
-  id: number;
-  title: string;
-  company: string;
-  date: string;
-  description: string;
-  skills?: { id: number; title: string }[];
-  type: "work" | "education";
-};
-
-const experiences: Experience[] = [
-  {
-    id: 1,
-    title: "IT Internship",
-    company: "PT Karya Solusi Prima Sejahtera",
-    date: "Sept 2024 - Present",
-    description:
-      "Developing scalable web applications using React and Node.js.",
-    skills: [
-      {
-        id: 1,
-        title: "PHP",
-      },
-      {
-        id: 2,
-        title: "Laravel",
-      },
-      {
-        id: 3,
-        title: "Docker",
-      },
-    ],
-    type: "work",
-  },
-  {
-    id: 2,
-    title: "Remote AI Trainer for Indonesian writers",
-    company: "Outlier",
-    date: "Sept 2024 - Present",
-    description:
-      "Developing scalable web applications using React and Node.js.",
-    skills: [
-      {
-        id: 1,
-        title: "Prompt Engineering",
-      },
-    ],
-    type: "work",
-  },
-  {
-    id: 3,
-    title: "Techincal Consultant",
-    company: "PT Global Information Technology",
-    date: "Jan - July 2024",
-    description: "Worked on frontend development using React and Redux.",
-    skills: [
-      {
-        id: 1,
-        title: "Splunk",
-      },
-      {
-        id: 2,
-        title: "IT Operation",
-      },
-      {
-        id: 3,
-        title: "IT Security",
-      },
-      {
-        id: 4,
-        title: "NextJS",
-      },
-      {
-        id: 5,
-        title: "META Development",
-      },
-    ],
-    type: "work",
-  },
-  {
-    id: 4,
-    title: "Informatics Degree",
-    company: "Universitas Multimedia Nusantara",
-    date: "Aug 2021 - Present",
-    description:
-      "Studied algorithms, data structures, and software engineering principles.",
-    type: "education",
-  },
-];
+import { experiences as experienceItem } from "@/app/data/experiences"; // Import experiences data
+import type { Experience } from "@/app/data/experiences"; // Import Experience type
 
 const ExperienceItem = ({
   experience,
@@ -174,6 +82,20 @@ const ExperienceItem = ({
 
 export default function Experiences() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [experiencesData, setExperiencesData] = useState<Experience[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate fetching data from an API
+    setTimeout(() => {
+      setExperiencesData(experienceItem); // Change from experiences to experienceItem
+      setLoading(false);
+    }, 1000); // Simulate a 1-second delay
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -186,8 +108,10 @@ export default function Experiences() {
       <div className="w-full h-auto text-slate-300">
         <div className="text-lg mt-4">Here are some works I've done.</div>
       </div>
-      <div className="relative p-4">
-        {experiences.map((exp) => (
+      <div className="relative p-4 mt-2">
+        {" "}
+        {/* Add margin-top to avoid overlap */}
+        {experiencesData.map((exp) => (
           <ExperienceItem
             key={exp.id}
             experience={exp}

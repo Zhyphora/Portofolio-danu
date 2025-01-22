@@ -1,59 +1,9 @@
+// Projects.tsx
+import { useEffect, useState } from "react";
 import { HiOutlineBeaker, HiOutlineExternalLink } from "react-icons/hi";
 import Image from "next/image";
-
-type Projects = {
-  id: number;
-  title: string;
-  company: string;
-  date: string;
-  description: string;
-  skills?: { id: number; title: string }[];
-  type: "paid" | "personal";
-  link: string;
-  imageUrl: string;
-};
-
-const projects: Projects[] = [
-  {
-    id: 1,
-    title: "GMLS",
-    company: "",
-    date: "2023-01-01",
-    description: "This is a description for Project 1.",
-    skills: [
-      { id: 1, title: "NextJs" },
-      { id: 2, title: "NodeJS" },
-    ],
-    type: "paid",
-    link: "https://gmls.org",
-    imageUrl: "",
-  },
-  {
-    id: 2,
-    title: "KejarTugas",
-    company: "",
-    date: "2023-01-01",
-    description: "This is a description for Project 1.",
-    skills: [
-      { id: 1, title: "NextJs" },
-      { id: 2, title: "NodeJS" },
-    ],
-    type: "paid",
-    link: "https://kejartugas.com",
-    imageUrl: "",
-  },
-  {
-    id: 3,
-    title: "KidsHub",
-    company: "",
-    date: "2023-02-01",
-    description: "This is a description for Project 2.",
-    skills: [{ id: 1, title: "Kotlin" }],
-    type: "personal",
-    link: "https://github.com/Universitas-Multimedia-Nusantara/kidshub-app",
-    imageUrl: "",
-  },
-];
+import { projects as projectItem } from "@/app/data/projects";
+import type { Projects } from "@/app/data/projects";
 
 const ProjectItem = ({ project }: { project: Projects }) => {
   return (
@@ -99,6 +49,21 @@ const ProjectItem = ({ project }: { project: Projects }) => {
 };
 
 export default function Projects() {
+  const [projectsData, setProjectsData] = useState<Projects[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate fetching data from an API
+    setTimeout(() => {
+      setProjectsData(projectItem); // Fix variable name
+      setLoading(false);
+    }, 1000); // Simulate a 1-second delay
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <div className="w-full h-auto mt-12 mb-4 lg:ml-[-1.25em] flex justify-start items-center space-x-2 text-white text-3xl">
@@ -110,9 +75,11 @@ export default function Projects() {
       <div className="w-full h-auto text-slate-300">
         <div className="text-lg mt-4">Here are some projects I've built.</div>
       </div>
-      <div className="px-4 py-8">
+      <div className="px-4 py-8 mt-2">
+        {" "}
+        {/* Add margin-top to avoid overlap */}
         <div className="grid grid-cols-1 gap-4">
-          {projects.map((project) => (
+          {projectsData.map((project) => (
             <ProjectItem key={project.id} project={project} />
           ))}
         </div>
