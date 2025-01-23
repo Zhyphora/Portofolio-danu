@@ -1,4 +1,3 @@
-// FloatingButton.tsx
 "use client";
 
 import { useState } from "react";
@@ -9,7 +8,11 @@ import MusicPlayer from "./MusicPlayer";
 import BackToTheTop from "./BackToTheTop";
 import ChatBot from "./ChatBot";
 
-export default function FloatingButton() {
+interface FloatingButtonProps {
+  terminalWidth: number; // Add terminalWidth as a prop
+}
+
+export default function FloatingButton({ terminalWidth }: FloatingButtonProps) {
   const [isMusicOpen, setIsMusicOpen] = useState(false);
 
   const buttonVariants = {
@@ -25,9 +28,13 @@ export default function FloatingButton() {
   return (
     <>
       {/* Left Floating Button (Music Player) */}
-      <div className="fixed bottom-4 left-4 flex flex-col items-start space-y-2 z-50">
-        {" "}
-        {/* Add z-50 */}
+      <div
+        className="fixed bottom-4 left-4 flex flex-col items-start space-y-2 z-50"
+        style={{
+          width: `${terminalWidth}px`, // Set width based on terminalWidth
+          maxWidth: "95vw", // Ensure it doesn't exceed the screen width on small devices
+        }}
+      >
         <AnimatePresence>
           {isMusicOpen && (
             <motion.div
@@ -59,9 +66,13 @@ export default function FloatingButton() {
       </div>
 
       {/* Right Floating Buttons (Chat and Back to Top) */}
-      <div className="fixed bottom-4 right-4 flex flex-col items-end space-y-2 z-50">
-        {" "}
-        {/* Add z-50 */}
+      <div
+        className="fixed bottom-4 right-4 flex flex-col items-end space-y-2 z-50"
+        style={{
+          width: `${terminalWidth}px`, // Set width based on terminalWidth
+          maxWidth: "95vw", // Ensure it doesn't exceed the screen width on small devices
+        }}
+      >
         <BackToTheTop />
         <ChatBot />
       </div>

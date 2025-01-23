@@ -148,10 +148,10 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
         scale: showFullTerminal ? 1 : 0.95,
       }}
       transition={{ duration: 1, ease: "easeInOut" }}
-      className="w-auto p-4 bg-[#131821] border-[2px] border-[#273344] text-slate-200 rounded-xl font-mono text-md"
+      className="w-full max-w-full p-4 bg-[#131821] border-[2px] border-[#273344] text-slate-200 rounded-xl font-mono text-md"
       onClick={focusInput}
     >
-      <div className="bg-[#131821] text-slate-200 font-mono text-md p-4 border-[2px] border-[#273344]">
+      <div className="bg-[#131821] text-slate-200 font-mono text-md p-4">
         <div className="flex items-center mb-3 space-x-2">
           <div className="w-3 h-3 bg-[#FF6059] rounded-full"></div>
           <div className="w-3 h-3 bg-[#FFBE2F] rounded-full"></div>
@@ -161,8 +161,9 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
           visitor@naufal.me:~$
         </div>
         <div
-          className="terminal border-[2px] border-[#273344]"
+          className="terminal overflow-x-auto"
           ref={terminalRef}
+          style={{ maxWidth: "100%" }}
         >
           <div className={`${styles.terminalOutput} ${styles.scrollbar}`}>
             {history.map((item, index) => (

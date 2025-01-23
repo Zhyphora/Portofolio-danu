@@ -5,7 +5,7 @@ export default function Layout({
 }>) {
   return (
     <div>
-      <div className="min-h-screen px-4 lg:px-24 py-24 ">{children}</div>
+      <div className="min-h-screen px-4 lg:px-24 py-24">{children}</div>
     </div>
   );
 }
