@@ -1,6 +1,9 @@
-// commands.ts
+import { experiences, Experience } from "./experiences"; // Import Experience type
+import { projects, Projects } from "./projects"; // Import Projects type
+
 export const help = [
   "whois",
+  "experiences",
   "projects",
   "social",
   "banner",
@@ -9,7 +12,25 @@ export const help = [
   "su",
 ];
 
-export const handleCommand = (command: string): string => {
+// Simulate fetching experiences from an API
+const fetchExperiences = (): Promise<Experience[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(experiences);
+    }, 1000); // Simulate a 1-second delay
+  });
+};
+
+// Simulate fetching projects from an API
+const fetchProjects = (): Promise<Projects[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(projects);
+    }, 1000); // Simulate a 1-second delay
+  });
+};
+
+export const handleCommand = async (command: string): Promise<string> => {
   const args = command.trim().split(" ");
   let output = "";
 
@@ -18,8 +39,15 @@ export const handleCommand = (command: string): string => {
       output =
         "Hello guys! I'm a Software Development Enthusiast. Currently, I'm a 4th year informatics student \nat Universitas Multimedia Nusantara. I am incredibly interested in front-end, creative, full-stack, \nand IT Security development. All I am interested in are web, mobile applications, and cyber-security. \nI am currently looking for some opportunities to work with a team. 😍";
       break;
+    case "experiences":
+      output = "Fetching experiences...\n";
+      const experiencesData = await fetchExperiences();
+      output += formatExperiences(experiencesData);
+      break;
     case "projects":
-      output = "1. Project A\n2. Project B\n3. Project C";
+      output = "Fetching projects...\n";
+      const projectsData = await fetchProjects();
+      output += formatProjects(projectsData);
       break;
     case "social":
       output =
@@ -41,6 +69,43 @@ export const handleCommand = (command: string): string => {
   }
 
   return output;
+};
+
+// Helper function to format experiences
+const formatExperiences = (experiences: Experience[]): string => {
+  return experiences
+    .map((exp) => {
+      const skills = exp.skills
+        ? exp.skills.map((skill) => skill.title).join(", ")
+        : "N/A";
+      return `
+[ • ] ${exp.title} at ${exp.company}
+      Date: ${exp.date}
+      Description: ${exp.description}
+      Skills: ${skills}
+      Type: ${exp.type}
+`;
+    })
+    .join("\n");
+};
+
+// Helper function to format projects
+const formatProjects = (projects: Projects[]): string => {
+  return projects
+    .map((proj) => {
+      const skills = proj.skills
+        ? proj.skills.map((skill) => skill.title).join(", ")
+        : "N/A";
+      return `
+[ • ] ${proj.title}
+      Date: ${proj.date}
+      Description: ${proj.description}
+      Skills: ${skills}
+      Type: ${proj.type}
+    Link: ${proj.link}
+`;
+    })
+    .join("\n");
 };
 
 export const banner = `Naufal Syarif, All rights reserved.

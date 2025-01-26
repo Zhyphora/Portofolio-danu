@@ -8,7 +8,13 @@ import React, {
   KeyboardEvent,
 } from "react";
 import { motion } from "framer-motion";
-import { handleCommand, banner, initialMessage } from "../../data/commands"; // Import initialMessage
+import Linkify from "react-linkify"; // For detecting and making links clickable
+import {
+  handleCommand,
+  banner,
+  initialMessage,
+  help,
+} from "../../data/commands"; // Import help for autocomplete
 import styles from "@/app/components/Terminal/Terminal.module.css";
 
 interface HistoryItem {
@@ -26,17 +32,20 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [showFullTerminal, setShowFullTerminal] = useState(false);
   const [initialMessageComplete, setInitialMessageComplete] = useState(false);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]); // Store command history
+  const [historyIndex, setHistoryIndex] = useState<number>(-1); // Track current position in history
   const inputRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const outputRef = useRef<HTMLDivElement>(null); // Change to HTMLDivElement
 
   const handleInput = (e: FormEvent<HTMLDivElement>) => {
     setTerminalInput(e.currentTarget.textContent || "");
   };
 
-  const handleEnter = (e: KeyboardEvent<HTMLDivElement>) => {
+  const handleEnter = async (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      executeCommand(terminalInput);
+      await executeCommand(terminalInput);
       setTerminalInput("");
       if (inputRef.current) {
         inputRef.current.textContent = "";
@@ -44,7 +53,58 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
     }
   };
 
-  const executeCommand = (command: string) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // Command history navigation
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+      let newIndex = historyIndex;
+
+      if (e.key === "ArrowUp" && newIndex < commandHistory.length - 1) {
+        newIndex += 1;
+      } else if (e.key === "ArrowDown" && newIndex > 0) {
+        newIndex -= 1;
+      }
+
+      if (newIndex !== historyIndex) {
+        setHistoryIndex(newIndex);
+        const command =
+          commandHistory[commandHistory.length - 1 - newIndex] || "";
+        setTerminalInput(command);
+        if (inputRef.current) {
+          inputRef.current.textContent = command;
+          moveCaretToEnd(inputRef.current); // Move caret to the end
+        }
+      }
+    }
+
+    // Autocomplete on Tab
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const input = terminalInput.trim();
+      if (input) {
+        const matchedCommand = help.find((cmd) => cmd.startsWith(input));
+        if (matchedCommand) {
+          setTerminalInput(matchedCommand);
+          if (inputRef.current) {
+            inputRef.current.textContent = matchedCommand;
+            moveCaretToEnd(inputRef.current); // Move caret to the end
+          }
+        }
+      }
+    }
+  };
+
+  // Helper function to move the caret to the end of the content
+  const moveCaretToEnd = (element: HTMLElement) => {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(element);
+    range.collapse(false); // Move caret to the end
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  };
+
+  const executeCommand = async (command: string) => {
     if (isTyping) return; // Prevent multiple commands at once
 
     if (command.trim() === "clear") {
@@ -52,17 +112,21 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
       return;
     }
 
-    const output = handleCommand(command); // Use the handleCommand function from commands.ts
+    // Add command to history
+    setCommandHistory((prev) => [...prev, command]);
+    setHistoryIndex(-1); // Reset history index after executing a new command
+
+    const output = await handleCommand(command); // Await the handleCommand function
 
     // Simulate typing animation
     setIsTyping(true);
     setHistory((prev) => [
       ...prev,
       { type: "prompt", content: `visitor@naufal.me:~$ ${command}` }, // Add the command to history as prompt
-      { type: "output", content: "visitor@naufal.me:~$" }, // Add a prompt line above the output
+      { type: "output", content: "" }, // Start with empty output
     ]);
 
-    simulateTyping(output, 5, () => {
+    simulateTyping(output, 10, () => {
       setIsTyping(false); // End typing state
     });
   };
@@ -83,6 +147,15 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
           { type: "output", content: currentLine },
         ]);
         index++;
+
+        // Move caret to the end of the output
+        if (outputRef.current) {
+          outputRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+          });
+          moveCaretToEnd(outputRef.current);
+        }
       } else {
         clearInterval(interval);
         callback();
@@ -174,7 +247,28 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
                 }`}
               >
                 {item.type === "output" ? (
-                  <pre className="whitespace-pre">{item.content}</pre>
+                  <Linkify
+                    componentDecorator={(decoratedHref, decoratedText, key) => (
+                      <a
+                        href={decoratedHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "#FFA23E",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        {decoratedText}
+                      </a>
+                    )}
+                  >
+                    <pre
+                      ref={index === history.length - 1 ? outputRef : null} // Attach ref to the last output
+                      className="whitespace-pre"
+                    >
+                      {item.content}
+                    </pre>
+                  </Linkify>
                 ) : (
                   item.content
                     .split("\n")
@@ -194,7 +288,10 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
                     isTyping ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onInput={handleInput}
-                  onKeyDown={handleEnter}
+                  onKeyDown={(e) => {
+                    handleEnter(e);
+                    handleKeyDown(e);
+                  }}
                   style={{ display: "inline-block" }}
                   spellCheck={false}
                 />
