@@ -102,7 +102,7 @@ const formatProjects = (projects: Projects[]): string => {
       Description: ${proj.description}
       Skills: ${skills}
       Type: ${proj.type}
-    Link: ${proj.link}
+      Link: ${proj.link}
 `;
     })
     .join("\n");
