@@ -23,7 +23,8 @@ export const projects: Projects[] = [
     ],
     type: "paid",
     link: "https://gmls.org",
-    imageUrl: "",
+    imageUrl:
+      "https://drive.google.com/uc?export=view&id=1X-0SAOrTPq3UJt-GbbchLU5tH77-dI-w", // Direct image link
   },
   {
     id: 2,
@@ -37,17 +38,7 @@ export const projects: Projects[] = [
     ],
     type: "paid",
     link: "https://kejartugas.com",
-    imageUrl: "",
-  },
-  {
-    id: 3,
-    title: "KidsHub",
-    company: "",
-    date: "2023-02-01",
-    description: "This is a description for Project 2.",
-    skills: [{ id: 1, title: "Kotlin" }],
-    type: "personal",
-    link: "https://github.com/Universitas-Multimedia-Nusantara/kidshub-app",
-    imageUrl: "",
+    imageUrl:
+      "https://drive.google.com/uc?export=view&id=1sFIS_hazQSbNEkzY9IrkQZU-TdhPwOy-", // Direct image link
   },
 ];

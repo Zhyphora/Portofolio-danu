@@ -1,21 +1,8 @@
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
-
-/** @type {import('next').NextConfig} */
+// next.config.js
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    // Only run this on client-side builds
-    if (!isServer) {
-      config.plugins.push(
-        new MiniCssExtractPlugin({
-          filename: "[name].[contenthash].css",
-          chunkFilename: "[id].[contenthash].css",
-        })
-      );
-    }
-
-    return config;
+  images: {
+    domains: ["drive.google.com"], // Allow images from Google Drive
   },
-  // Add any other Next.js config options you need
   reactStrictMode: true,
   swcMinify: true,
 };
