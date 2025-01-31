@@ -15,7 +15,7 @@ import Navbar from "@/app/components/Navbar";
 export default function Home() {
   const [showContent, setShowContent] = useState(false);
   const [terminalHeight, setTerminalHeight] = useState(0);
-  const [terminalWidth, setTerminalWidth] = useState(0); // Add state for terminal width
+  const [terminalWidth, setTerminalWidth] = useState(0);
   const terminalRef = useRef<HTMLDivElement>(null);
 
   const handleBannerComplete = () => {
@@ -23,50 +23,56 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (terminalRef.current) {
-      setTerminalHeight(terminalRef.current.offsetHeight);
-      setTerminalWidth(terminalRef.current.offsetWidth); // Set terminal width
-    }
+    const updateTerminalDimensions = () => {
+      if (terminalRef.current) {
+        setTerminalHeight(terminalRef.current.offsetHeight);
+        setTerminalWidth(terminalRef.current.offsetWidth);
+      }
+    };
+
+    updateTerminalDimensions();
+    window.addEventListener("resize", updateTerminalDimensions);
+
+    return () => {
+      window.removeEventListener("resize", updateTerminalDimensions);
+    };
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#10151D] xl:px-44 2xl:px-64">
+    <main className="min-h-screen bg-[#10151D]">
       <Layout>
-        <Navbar terminalHeight={terminalHeight} />
-        <div className="h-full w-full">
-          {/* Terminal Container with Responsive Constraints */}
-          <div
-            ref={terminalRef}
-            className="mx-auto w-full max-w-[95vw] md:max-w-[47.5rem] lg:max-w-[55rem] 2xl:max-w-[65rem]"
-          >
-            <Terminal onBannerComplete={handleBannerComplete} />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <Navbar terminalHeight={terminalHeight} />
+          <div className="w-full">
+            <div ref={terminalRef} className="mx-auto w-full">
+              <Terminal onBannerComplete={handleBannerComplete} />
+            </div>
+            <AnimatePresence>
+              {showContent && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 20, opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  className="w-full h-auto mt-8"
+                >
+                  <FloatingButton terminalWidth={terminalWidth} />
+                  <div className="space-y-16">
+                    <div id="about">
+                      <About />
+                    </div>
+                    <div id="experiences">
+                      <Experiences />
+                    </div>
+                    <div id="projects">
+                      <Projects />
+                    </div>
+                  </div>
+                  <Footer />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <AnimatePresence>
-            {showContent && (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className="w-full h-auto lg:px-24 2xl:px-32"
-              >
-                {/* Pass terminalWidth to FloatingButton */}
-                <FloatingButton terminalWidth={terminalWidth} />
-                <div className="max-w-4xl mx-auto space-y-16 2xl:max-w-6xl">
-                  <div id="about">
-                    <About />
-                  </div>
-                  <div id="experiences">
-                    <Experiences />
-                  </div>
-                  <div id="projects">
-                    <Projects />
-                  </div>
-                </div>
-                <Footer />
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </Layout>
     </main>

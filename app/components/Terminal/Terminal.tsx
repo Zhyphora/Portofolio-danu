@@ -36,7 +36,8 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
   const [historyIndex, setHistoryIndex] = useState<number>(-1); // Track current position in history
   const inputRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
-  const outputRef = useRef<HTMLDivElement>(null); // Change to HTMLDivElement
+  const outputRef = useRef<HTMLPreElement | null>(null); // Correct type for <pre>
+  // Change to HTMLDivElement
 
   const handleInput = (e: FormEvent<HTMLDivElement>) => {
     setTerminalInput(e.currentTarget.textContent || "");

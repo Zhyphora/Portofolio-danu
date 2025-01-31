@@ -38,21 +38,15 @@ export default function ChatBot() {
     // Simulate a delay for API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Simulate bot responses
-    switch (question) {
-      case "How can I approach Mr. Naufal?":
-        return "You can contact Mr. Naufal by email at naufal@example.com or schedule an appointment through our online booking system.";
-      case "What are your business hours?":
-        return "Our business hours are Monday to Friday, 9 AM to 5 PM. We are closed on weekends and public holidays.";
-      case "Can you tell me about your services?":
-        return "We offer a wide range of services including consulting, project management, and software development. Would you like more information about a specific service?";
-      case "Do you offer remote consultations?":
-        return "Yes, we offer remote consultations via video conferencing. You can book a remote session through our online scheduling system.";
-      case "What's your refund policy?":
-        return "Our refund policy allows for full refunds within 14 days of purchase, provided the service has not been used. Please refer to our terms of service for more details.";
-      default:
-        return "I'm sorry, I don't have information about that specific question. Is there anything else I can help you with?";
-    }
+    // Find the matching question in the predefinedQuestions array
+    const matchedQuestion = predefinedQuestions.find(
+      (item) => item.question === question
+    );
+
+    // Return the answer if found; otherwise, return a default response
+    return matchedQuestion
+      ? matchedQuestion.answer
+      : "I'm sorry, I don't have information about that specific question. Is there anything else I can help you with?";
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -117,14 +111,14 @@ export default function ChatBot() {
               onMouseLeave={handleMouseUp}
             >
               <div className="flex space-x-2" style={{ width: "max-content" }}>
-                {predefinedQuestions.map((question, index) => (
+                {predefinedQuestions.map((item, index) => (
                   <Button
                     key={index}
-                    onClick={() => handleQuestionClick(question)}
+                    onClick={() => handleQuestionClick(item.question)} // Pass the `question` string
                     variant="outline"
                     className="whitespace-nowrap bg-[#131821]/50 backdrop-blur-lg border-[1px] border-[#273344]/50 text-slate-200"
                   >
-                    {question}
+                    {item.question} {/* Display the question */}
                   </Button>
                 ))}
               </div>
