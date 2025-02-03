@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { HiOutlineBeaker, HiOutlineExternalLink } from "react-icons/hi";
 import { motion } from "framer-motion";
 
-// Tetris Animation Component
 const COLORS = ["#F43F5E", "#10B981", "#FFA23E", "#3B82F6", "#8B5CF6"];
 const SHAPES = [
   [
@@ -26,16 +25,12 @@ const SHAPES = [
   ], // S
 ];
 
-const GRID_HEIGHT = 8;
-const GRID_WIDTH = 12;
-
 const TetrisAnimation = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [gridSize, setGridSize] = useState({ rows: 8, cols: 12 });
+  const [gridSize] = useState({ rows: 8, cols: 12 });
+  const [blockSize, setBlockSize] = useState(0);
   const [grid, setGrid] = useState<string[][]>(
-    Array(gridSize.rows)
-      .fill(null)
-      .map(() => Array(gridSize.cols).fill(""))
+    Array.from({ length: 16 }, () => Array(10).fill(""))
   );
   const [currentPiece, setCurrentPiece] = useState<{
     shape: number[][];
@@ -43,196 +38,193 @@ const TetrisAnimation = () => {
     x: number;
     y: number;
   } | null>(null);
+  const [gameOver, setGameOver] = useState(false);
 
-  // Dynamically calculate grid size based on container
+  // Calculate block size based on container
+  const calculateBlockSize = useCallback(() => {
+    if (!containerRef.current) return;
+    const { width, height } = containerRef.current.getBoundingClientRect();
+    setBlockSize(Math.min(width / 10, height / 16));
+  }, []);
+
   useEffect(() => {
-    const updateGridSize = () => {
+    const updateSizes = () => {
       if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        const blockSize = Math.min(
-          Math.floor(width / 12),
-          Math.floor(height / 8)
-        );
-        const cols = Math.floor(width / blockSize);
-        const rows = Math.floor(height / blockSize);
+        const container = containerRef.current;
+        const gap = 1;
+        const { width, height } = container.getBoundingClientRect();
 
-        setGridSize({ rows, cols });
-        setGrid(
-          Array(rows)
-            .fill(null)
-            .map(() => Array(cols).fill(""))
+        const widthAfterGaps = width - (gridSize.cols - 1) * gap;
+        const heightAfterGaps = height - (gridSize.rows - 1) * gap;
+
+        const newBlockSize = Math.min(
+          widthAfterGaps / gridSize.cols,
+          heightAfterGaps / gridSize.rows
         );
+
+        setBlockSize(newBlockSize); // Remove Math.floor for precise sizing
       }
     };
 
-    updateGridSize();
-    window.addEventListener("resize", updateGridSize);
-    return () => window.removeEventListener("resize", updateGridSize);
-  }, []);
+    updateSizes();
+    const resizeObserver = new ResizeObserver(updateSizes);
+    containerRef.current && resizeObserver.observe(containerRef.current);
 
-  const createNewPiece = useCallback(() => {
-    const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-    return {
-      shape,
-      color,
-      x: Math.floor(Math.random() * (gridSize.cols - shape[0].length + 1)),
-      y: 0,
+    return () => {
+      containerRef.current && resizeObserver.unobserve(containerRef.current);
     };
   }, [gridSize]);
 
-  const isValidMove = useCallback(
-    (piece: typeof currentPiece, newX: number, newY: number) => {
-      if (!piece) return false;
-      for (let y = 0; y < piece.shape.length; y++) {
-        for (let x = 0; x < piece.shape[y].length; x++) {
-          if (piece.shape[y][x]) {
-            const nextX = newX + x;
-            const nextY = newY + y;
-            if (
-              nextX < 0 ||
-              nextX >= gridSize.cols ||
-              nextY >= gridSize.rows ||
-              (nextY >= 0 && grid[nextY][nextX])
-            ) {
-              return false;
-            }
-          }
-        }
-      }
-      return true;
-    },
-    [grid, gridSize]
-  );
+  const createNewPiece = useCallback(() => {
+    const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    return {
+      shape,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      x: Math.floor((10 - shape[0].length) / 2),
+      y: 0,
+    };
+  }, []);
 
-  const placePiece = useCallback(
-    (piece: NonNullable<typeof currentPiece>) => {
-      const newGrid = grid.map((row) => [...row]);
-      for (let y = 0; y < piece.shape.length; y++) {
-        for (let x = 0; x < piece.shape[y].length; x++) {
-          if (piece.shape[y][x]) {
-            newGrid[piece.y + y][piece.x + x] = piece.color;
-          }
-        }
-      }
+  const checkCollision = (
+    piece: typeof currentPiece,
+    newX: number,
+    newY: number
+  ) => {
+    if (!piece) return true;
 
-      // Check for complete lines and clear them
-      const filledLines = newGrid.reduce((lines, row, index) => {
-        if (row.every((cell) => cell !== "")) {
-          lines.push(index);
-        }
-        return lines;
-      }, [] as number[]);
-
-      // Remove complete lines and add empty rows at the top
-      if (filledLines.length > 0) {
-        const filteredGrid = newGrid.filter(
-          (_, index) => !filledLines.includes(index)
+    return piece.shape.some((row, dy) =>
+      row.some((cell, dx) => {
+        if (!cell) return false;
+        const nextX = newX + dx;
+        const nextY = newY + dy;
+        return (
+          nextX < 0 ||
+          nextX >= 10 ||
+          nextY >= 16 ||
+          (nextY >= 0 && grid[nextY][nextX])
         );
-        const emptyRows = Array(filledLines.length)
-          .fill(null)
-          .map(() => Array(gridSize.cols).fill(""));
+      })
+    );
+  };
 
-        setGrid([...emptyRows, ...filteredGrid]);
-      } else {
-        setGrid(newGrid);
+  const mergePiece = () => {
+    if (!currentPiece) return;
+
+    const newGrid = grid.map((row) => [...row]);
+    currentPiece.shape.forEach((row, dy) => {
+      row.forEach((cell, dx) => {
+        if (cell) {
+          const y = currentPiece.y + dy;
+          const x = currentPiece.x + dx;
+          if (y >= 0) newGrid[y][x] = currentPiece.color;
+        }
+      });
+    });
+    setGrid(newGrid);
+  };
+
+  const clearLines = () => {
+    const newGrid = grid.filter((row) => !row.every((cell) => cell));
+    const linesCleared = grid.length - newGrid.length;
+    const emptyRows = Array.from({ length: linesCleared }, () =>
+      Array(10).fill("")
+    );
+    setGrid([...emptyRows, ...newGrid]);
+    return linesCleared > 0;
+  };
+
+  const gameLoop = useCallback(() => {
+    if (gameOver) return;
+
+    setCurrentPiece((prev) => {
+      if (!prev) return createNewPiece();
+
+      // Try to move down
+      if (!checkCollision(prev, prev.x, prev.y + 1)) {
+        return { ...prev, y: prev.y + 1 };
       }
-    },
-    [grid, gridSize]
-  );
+
+      // Merge piece with grid
+      mergePiece();
+
+      // Check for game over
+      if (prev.y <= 1) {
+        setGameOver(true);
+        return null;
+      }
+
+      // Clear completed lines
+      clearLines();
+
+      // Create new piece
+      return createNewPiece();
+    });
+  }, [gameOver, grid, createNewPiece]);
 
   useEffect(() => {
-    if (!currentPiece) {
-      setCurrentPiece(createNewPiece());
-      return;
-    }
-
-    const interval = setInterval(() => {
-      if (isValidMove(currentPiece, currentPiece.x, currentPiece.y + 1)) {
-        setCurrentPiece((prev) => (prev ? { ...prev, y: prev.y + 1 } : null));
-      } else {
-        // Check if piece is at the top of the grid
-        if (currentPiece.y === 0) {
-          // Reset the entire grid
-          setGrid(
-            Array(gridSize.rows)
-              .fill(null)
-              .map(() => Array(gridSize.cols).fill(""))
-          );
-        } else {
-          placePiece(currentPiece);
-        }
-        setCurrentPiece(createNewPiece());
-      }
-    }, 500);
-
+    const interval = setInterval(gameLoop, 500);
     return () => clearInterval(interval);
-  }, [currentPiece, createNewPiece, isValidMove, placePiece, gridSize]);
-
-  // Calculate block size dynamically
-  const blockSize = containerRef.current
-    ? Math.min(
-        Math.floor(containerRef.current.offsetWidth / gridSize.cols),
-        Math.floor(containerRef.current.offsetHeight / gridSize.rows)
-      )
-    : 0;
+  }, [gameLoop]);
 
   return (
     <div
       ref={containerRef}
       className="w-full h-full bg-gray-800 relative overflow-hidden"
     >
-      {grid.map((row, y) => (
-        <div key={y} className="flex">
-          {row.map((cell, x) => (
+      <div
+        className="absolute top-0 left-0"
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${gridSize.cols}, ${blockSize}px)`,
+          gridTemplateRows: `repeat(${gridSize.rows}, ${blockSize}px)`,
+          gap: "1px",
+          width: `${gridSize.cols * blockSize + (gridSize.cols - 1)}px`,
+          height: `${gridSize.rows * blockSize + (gridSize.rows - 1)}px`,
+        }}
+      >
+        {grid.map((row, y) =>
+          row.map((cell, x) => (
             <div
               key={`${x}-${y}`}
-              className="border border-gray-700"
+              className="box-border border border-gray-700"
               style={{
-                width: `${blockSize}px`,
-                height: `${blockSize}px`,
+                width: blockSize,
+                height: blockSize,
                 backgroundColor: cell || "transparent",
               }}
             />
-          ))}
-        </div>
-      ))}
+          ))
+        )}
+      </div>
+
+      {/* Current piece */}
       {currentPiece && (
         <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
+          className="absolute"
           style={{
-            position: "absolute",
-            left: `${currentPiece.x * blockSize}px`,
-            top: `${currentPiece.y * blockSize}px`,
+            left: currentPiece.x * blockSize,
+            top: currentPiece.y * blockSize,
           }}
         >
-          {currentPiece.shape.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex">
-              {row.map((cell, cellIndex) =>
+          {currentPiece.shape.map((row, dy) => (
+            <div key={dy} className="flex">
+              {row.map((cell, dx) =>
                 cell ? (
                   <motion.div
-                    key={cellIndex}
+                    key={dx}
+                    className="box-border border-2 border-gray-800"
                     style={{
-                      width: `${blockSize}px`,
-                      height: `${blockSize}px`,
+                      width: blockSize,
+                      height: blockSize,
                       backgroundColor: currentPiece.color,
                     }}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      duration: 0.2,
-                      delay: (rowIndex + cellIndex) * 0.05,
-                    }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
                   />
                 ) : (
                   <div
-                    key={cellIndex}
-                    style={{
-                      width: `${blockSize}px`,
-                      height: `${blockSize}px`,
-                    }}
+                    key={dx}
+                    style={{ width: blockSize, height: blockSize }}
                   />
                 )
               )}
@@ -240,41 +232,43 @@ const TetrisAnimation = () => {
           ))}
         </motion.div>
       )}
+
+      {/* Game Over Overlay */}
+      {gameOver && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <span className="text-white text-xl font-bold">Game Over</span>
+        </div>
+      )}
     </div>
   );
 };
-// ProjectItem Component
+
 const ProjectItem = ({
   project,
-  index,
   onOpenModal,
 }: {
   project: Projects;
-  index: number;
-  onOpenModal: (project: Projects) => void;
+  onOpenModal: () => void;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
-      className="transform cursor-pointer shadow-md transition-all duration-300 border-2 border-[#273344] hover:scale-105"
-      onClick={() => onOpenModal(project)}
+      className="relative h-64 bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all"
+      onClick={onOpenModal}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative h-64 w-full overflow-hidden">
-        <div className="flex h-full">
-          <div className="w-1/2 h-full p-5 bg-gray-600">
-            <h3 className="text-xl h-full font-semibold text-white">
-              {project.title}
-            </h3>
-          </div>
-          <div className="flex w-1/2 h-full justify-end bg-gray-800">
-            <TetrisAnimation />
-          </div>
+      <div className="flex h-full">
+        <div className="w-1/2 p-6 bg-gradient-to-br from-gray-800 to-gray-900">
+          <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
+          <p className="text-gray-400 line-clamp-3">{project.description}</p>
+        </div>
+        <div className="w-1/2 relative">
+          <TetrisAnimation />
           {isHovered && (
-            <div className="absolute top-4 right-4">
-              <HiOutlineExternalLink className="text-white text-2xl" />
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <HiOutlineExternalLink className="text-white text-4xl animate-pulse" />
             </div>
           )}
         </div>
@@ -283,47 +277,44 @@ const ProjectItem = ({
   );
 };
 
-// Main Projects Component
 export default function Projects() {
   const [projects, setProjects] = useState<Projects[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProject, setSelectedProject] = useState<Projects | null>(null);
 
   useEffect(() => {
-    // Simulate loading data
     setTimeout(() => {
       setProjects(projectItem);
       setLoading(false);
     }, 1000);
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFA23E]"></div>
+      </div>
+    );
 
   return (
-    <>
-      <div className="w-full h-auto mt-12 mb-4 lg:ml-[-1.25em] flex justify-start items-center space-x-2 text-white text-3xl">
-        <div className="text-[#FFA23E]">
-          <HiOutlineBeaker />
-        </div>
-        <div>Projects</div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="flex items-center mb-8 space-x-3">
+        <HiOutlineBeaker className="text-[#FFA23E] text-3xl" />
+        <h1 className="text-3xl font-bold text-white">Projects</h1>
       </div>
-      <div className="w-full h-auto text-slate-300">
-        <div className="text-lg mt-4">Here are some projects I've built.</div>
+
+      <p className="text-lg text-gray-400 mb-12">
+        Here are some projects I've built. Hover to see interactive previews.
+      </p>
+
+      <div className="grid grid-cols-1 gap-6">
+        {projects.map((project) => (
+          <ProjectItem
+            key={project.id}
+            project={project}
+            onOpenModal={() => console.log("Open modal for:", project.id)}
+          />
+        ))}
       </div>
-      <div className="px-4 py-8 mt-2">
-        <div className="grid grid-cols-1 gap-4">
-          {projects.map((project, index) => (
-            <ProjectItem
-              key={project.id}
-              project={project}
-              index={index}
-              onOpenModal={setSelectedProject}
-            />
-          ))}
-        </div>
-      </div>
-    </>
+    </div>
   );
 }

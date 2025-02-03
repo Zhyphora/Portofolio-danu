@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#10151D]">
       <Layout>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-56 2xl:px-64">
           <Navbar terminalHeight={terminalHeight} />
           <div className="w-full">
             <div ref={terminalRef} className="mx-auto w-full">
@@ -54,7 +54,7 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: 20, opacity: 0 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
-                  className="w-full h-auto mt-8"
+                  className="w-full h-auto mt-8 container mx-auto px-4 sm:px-6 lg:px-10 xl:px-10 2xl:px-12"
                 >
                   <FloatingButton terminalWidth={terminalWidth} />
                   <div className="space-y-16">
