@@ -41,6 +41,9 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
 
   const handleInput = (e: FormEvent<HTMLDivElement>) => {
     setTerminalInput(e.currentTarget.textContent || "");
+    if (inputRef.current) {
+      moveCaretToEnd(inputRef.current);
+    }
   };
 
   const handleEnter = async (e: KeyboardEvent<HTMLDivElement>) => {
@@ -50,12 +53,12 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
       setTerminalInput("");
       if (inputRef.current) {
         inputRef.current.textContent = "";
+        inputRef.current.focus();
       }
     }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    // Command history navigation
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault();
       let newIndex = historyIndex;
@@ -73,12 +76,13 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
         setTerminalInput(command);
         if (inputRef.current) {
           inputRef.current.textContent = command;
-          moveCaretToEnd(inputRef.current); // Move caret to the end
+          moveCaretToEnd(inputRef.current);
+          inputRef.current.focus();
         }
       }
     }
 
-    // Autocomplete on Tab
+    // Tab completion
     if (e.key === "Tab") {
       e.preventDefault();
       const input = terminalInput.trim();
@@ -88,7 +92,8 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
           setTerminalInput(matchedCommand);
           if (inputRef.current) {
             inputRef.current.textContent = matchedCommand;
-            moveCaretToEnd(inputRef.current); // Move caret to the end
+            moveCaretToEnd(inputRef.current);
+            inputRef.current.focus();
           }
         }
       }
@@ -188,6 +193,17 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
     }
   }, [isTyping, showFullTerminal]);
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      // Scroll the terminal to the bottom when content changes
+      terminalRef.current?.scrollTo({
+        top: terminalRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [history, terminalInput]);
+
   const focusInput = () => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -225,21 +241,25 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
       className="w-full max-w-full p-4 bg-[#131821] border-[2px] border-[#273344] text-slate-200 rounded-xl font-mono text-md"
       onClick={focusInput}
     >
-      <div className="bg-[#131821] text-slate-200 font-mono text-md p-4">
-        <div className="flex items-center mb-3 space-x-2">
-          <div className="w-3 h-3 bg-[#FF6059] rounded-full"></div>
-          <div className="w-3 h-3 bg-[#FFBE2F] rounded-full"></div>
-          <div className="w-3 h-3 bg-[#29CE42] rounded-full"></div>
+      <div className="bg-[#131821] text-slate-200 font-mono text-md">
+        {/* Terminal Header */}
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-[#273344]">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-[#FF6059] rounded-full"></div>
+            <div className="w-3 h-3 bg-[#FFBE2F] rounded-full"></div>
+            <div className="w-3 h-3 bg-[#29CE42] rounded-full"></div>
+          </div>
+          <div className="text-sm text-slate-400">Terminal</div>
+          <div className="w-16"></div> {/* Spacer for centering */}
         </div>
-        <div className="w-full flex items-center justify-center mb-4">
-          visitor@naufal.me:~$
-        </div>
+
+        {/* Terminal Content */}
         <div
-          className="terminal overflow-x-auto"
+          className="terminal overflow-y-auto max-h-[60vh]"
           ref={terminalRef}
           style={{ maxWidth: "100%" }}
         >
-          <div className={`${styles.terminalOutput} ${styles.scrollbar}`}>
+          <div className={`${styles.terminalOutput} ${styles.scrollbar} pb-2`}>
             {history.map((item, index) => (
               <div
                 key={index}
@@ -254,49 +274,44 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
                         href={decoratedHref}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{
-                          color: "#FFA23E",
-                          textDecoration: "underline",
-                        }}
+                        className="text-[#FFA23E] hover:text-[#FF8C0D] underline transition-colors"
                       >
                         {decoratedText}
                       </a>
                     )}
                   >
                     <pre
-                      ref={index === history.length - 1 ? outputRef : null} // Attach ref to the last output
-                      className="whitespace-pre"
+                      ref={index === history.length - 1 ? outputRef : null}
+                      className="whitespace-pre-wrap break-words"
                     >
                       {item.content}
                     </pre>
                   </Linkify>
                 ) : (
-                  item.content
-                    .split("\n")
-                    .map((line, i) => <div key={i}>{line}</div>)
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[#10B981]">❯</span>
+                    <span>{item.content}</span>
+                  </div>
                 )}
               </div>
             ))}
             {!isTyping && (
               <div className="flex items-center">
-                <span className="mr-1 text-[#FFA23E]">
-                  visitor@naufal.me:~$
-                </span>
-                <div
-                  ref={inputRef}
-                  contentEditable={!isTyping}
-                  className={`terminal-input bg-transparent text-slate-200 border-none outline-none resize-none font-mono h-6 caret-transparent focus:ring-0 focus:outline-none w-auto min-w-[10px] whitespace-pre-wrap ${
-                    isTyping ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  onInput={handleInput}
-                  onKeyDown={(e) => {
-                    handleEnter(e);
-                    handleKeyDown(e);
-                  }}
-                  style={{ display: "inline-block" }}
-                  spellCheck={false}
-                />
-                <div className="w-2 h-4 bg-[#C5C5C5] inline-block ml-1 animate-pulse"></div>
+                <span className="text-[#10B981]">❯</span>
+                <div className="flex items-center">
+                  <div
+                    ref={inputRef}
+                    contentEditable={!isTyping}
+                    className="terminal-input bg-transparent text-slate-200 outline-none font-mono px-2 whitespace-pre inline-block"
+                    onInput={handleInput}
+                    onKeyDown={(e) => {
+                      handleEnter(e);
+                      handleKeyDown(e);
+                    }}
+                    spellCheck={false}
+                  />
+                  <div className="w-2 h-5 bg-[#FFA23E] animate-pulse"></div>
+                </div>
               </div>
             )}
           </div>

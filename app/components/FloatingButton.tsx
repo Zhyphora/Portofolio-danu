@@ -1,81 +1,190 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import MusicPlayer from "./MusicPlayer";
-import BackToTheTop from "./BackToTheTop";
-import ChatBot from "./ChatBot";
+import { ArrowUp } from "lucide-react";
+import ChatBot from "@/app/components/ChatBot";
+import { Volume2, VolumeX } from "lucide-react";
+import { toast } from "sonner";
+import useSound from "use-sound";
 
 interface FloatingButtonProps {
-  terminalWidth: number; // Add terminalWidth as a prop
+  terminalWidth: number;
+  initialMessageComplete?: boolean;
 }
 
-export default function FloatingButton({ terminalWidth }: FloatingButtonProps) {
-  const [isMusicOpen, setIsMusicOpen] = useState(false);
+export default function FloatingButton({
+  terminalWidth,
+  initialMessageComplete = false,
+}: FloatingButtonProps) {
+  const [isMuted, setIsMuted] = useState(true);
+  const [volume, setVolume] = useState(0.4);
+  const [isLoading, setIsLoading] = useState(true);
+  const fadeInterval = useRef<NodeJS.Timeout>();
+  const hasAutoplayedRef = useRef(true);
 
-  const buttonVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+  const [play, { pause, sound }] = useSound("/music/background-music.mp3", {
+    volume,
+    loop: true,
+    interrupt: false,
+    onload: () => {
+      setIsLoading(false);
+      console.log("Music loaded successfully");
+      // Try to autoplay if initial message is complete
+      if (initialMessageComplete && !hasAutoplayedRef.current) {
+        setTimeout(() => handleInitialPlay(), 2000);
+      }
+    },
+  });
+
+  const handleInitialPlay = () => {
+    try {
+      hasAutoplayedRef.current = true;
+      setIsMuted(false);
+      play();
+      toast("🔊 Music played", {
+        description: "Background music is now playing",
+      });
+    } catch (error) {
+      console.error("Autoplay failed:", error);
+      toast("⚠️ Error", {
+        description: "Could not autoplay the music",
+      });
+    }
   };
 
-  const contentVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1 },
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (fadeInterval.current) {
+        clearInterval(fadeInterval.current);
+      }
+      pause();
+    };
+  }, [pause]);
+
+  const fadeIn = () => {
+    if (fadeInterval.current) clearInterval(fadeInterval.current);
+    let vol = 0;
+    setVolume(vol);
+    fadeInterval.current = setInterval(() => {
+      if (vol < 0.4) {
+        // Fade in to 40%
+        vol += 0.05;
+        setVolume(vol);
+      } else {
+        if (fadeInterval.current) clearInterval(fadeInterval.current);
+      }
+    }, 100);
+  };
+
+  const fadeOut = () => {
+    if (fadeInterval.current) clearInterval(fadeInterval.current);
+    let vol = 0.4; // Start fade out from 40%
+    setVolume(vol);
+    fadeInterval.current = setInterval(() => {
+      if (vol > 0) {
+        vol -= 0.05;
+        setVolume(vol);
+      } else {
+        if (fadeInterval.current) clearInterval(fadeInterval.current);
+        pause();
+      }
+    }, 100);
+  };
+
+  const handlePlay = () => {
+    setIsMuted(false);
+    fadeIn();
+    play();
+    toast("🔊 Music played", {
+      description: "Background music is now playing",
+    });
+  };
+
+  const handleStop = () => {
+    setIsMuted(true);
+    fadeOut();
+    toast("🔇 Music muted", {
+      description: "Background music has been muted",
+    });
+  };
+
+  const toggleMute = () => {
+    try {
+      if (isMuted) {
+        handlePlay();
+      } else {
+        handleStop();
+      }
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      toast("⚠️ Error", {
+        description: "Could not play the audio file",
+      });
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <>
-      {/* Left Floating Button (Music Player) */}
+      {/* Left Floating Button (Music Toggle) */}
       <div
-        className="fixed bottom-4 left-4 flex flex-col items-start space-y-2 z-50"
+        className="fixed bottom-4 left-4 z-50"
         style={{
-          width: `${terminalWidth}px`, // Set width based on terminalWidth
-          maxWidth: "95vw", // Ensure it doesn't exceed the screen width on small devices
+          width: `${terminalWidth}px`,
+          maxWidth: "95vw",
         }}
       >
-        <AnimatePresence>
-          {isMusicOpen && (
-            <motion.div
-              variants={contentVariants}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-            >
-              <MusicPlayer />
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <motion.div
-          initial="visible"
-          animate="visible"
-          variants={buttonVariants}
+        <Button
+          onClick={toggleMute}
+          disabled={isLoading}
+          className={`rounded-full p-2 bg-[#131821]/50 backdrop-blur-lg border-[2px] border-[#273344]/50 text-slate-200 transition-all duration-300 hover:border-[#273344] ${
+            isMuted ? "text-[#F43F5E] border-[#F43F5E]/50" : ""
+          } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+          variant="outline"
         >
-          <Button
-            onClick={() => setIsMusicOpen(!isMusicOpen)}
-            className={`rounded-full p-2 bg-[#131821]/50 backdrop-blur-lg border-[2px] border-[#273344]/50 text-slate-200 ${
-              isMusicOpen ? "bg-[#1c2736]" : ""
-            }`}
-            variant={isMusicOpen ? "default" : "outline"}
-          >
-            <Music className="h-6 w-6" />
-            <span className="sr-only">Music Player</span>
-          </Button>
-        </motion.div>
+          {isLoading ? (
+            <div className="h-6 w-6 animate-pulse">⏳</div>
+          ) : isMuted ? (
+            <VolumeX className="h-6 w-6" />
+          ) : (
+            <Volume2 className="h-6 w-6" />
+          )}
+          <span className="sr-only">
+            {isLoading ? "Loading music" : "Toggle Sound"}
+          </span>
+        </Button>
       </div>
 
       {/* Right Floating Buttons (Chat and Back to Top) */}
       <div
         className="fixed bottom-4 right-4 flex flex-col items-end space-y-2 z-50"
         style={{
-          width: `${terminalWidth}px`, // Set width based on terminalWidth
-          maxWidth: "95vw", // Ensure it doesn't exceed the screen width on small devices
+          width: `${terminalWidth}px`,
+          maxWidth: "95vw",
         }}
       >
         <BackToTheTop />
         <ChatBot />
       </div>
     </>
+  );
+}
+
+function BackToTheTop() {
+  return (
+    <Button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="rounded-full p-2 bg-[#131821]/50 backdrop-blur-lg border-[2px] border-[#273344]/50 text-slate-200 hover:border-[#273344]"
+      variant="outline"
+    >
+      <ArrowUp className="h-6 w-6" />
+      <span className="sr-only">Back to top</span>
+    </Button>
   );
 }
