@@ -74,13 +74,18 @@ export default function ChatBot() {
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
-            className="bg-[#131821]/50 backdrop-blur-lg p-4 rounded-lg shadow-lg mb-2 w-80 h-96 flex flex-col border-[2px] border-[#273344]/50 z-40" // Add z-40
+            className="bg-[#131821]/50 backdrop-blur-lg p-4 rounded-lg shadow-lg mb-2 w-80 h-96 flex flex-col border-[2px] border-[#273344]/50 z-40"
             variants={contentVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
           >
-            <ScrollArea className="flex-grow mb-4 h-[calc(100%-5em)]">
+            {/* Added title section */}
+            <div className="text-lg font-bold text-slate-200 mb-2 flex items-center">
+              <span className="mr-2">🤖</span> PALLY
+            </div>
+
+            <ScrollArea className="flex-grow mb-4">
               <div className="pr-4">
                 {messages.map((message, index) => (
                   <div
@@ -102,6 +107,8 @@ export default function ChatBot() {
                 ))}
               </div>
             </ScrollArea>
+
+            {/* Question container remains the same */}
             <div
               ref={questionContainerRef}
               className="w-full h-[5em] overflow-x-hidden cursor-grab active:cursor-grabbing"
@@ -114,11 +121,11 @@ export default function ChatBot() {
                 {predefinedQuestions.map((item, index) => (
                   <Button
                     key={index}
-                    onClick={() => handleQuestionClick(item.question)} // Pass the `question` string
+                    onClick={() => handleQuestionClick(item.question)}
                     variant="outline"
                     className="whitespace-nowrap bg-[#131821]/50 backdrop-blur-lg border-[1px] border-[#273344]/50 text-slate-200"
                   >
-                    {item.question} {/* Display the question */}
+                    {item.question}
                   </Button>
                 ))}
               </div>
@@ -135,7 +142,7 @@ export default function ChatBot() {
         variant={isChatOpen ? "default" : "outline"}
       >
         <MessageCircle className="h-6 w-6" />
-        <span className="sr-only">Bot Chat</span>
+        <span className="sr-only">Chat with PALLY</span>
       </Button>
     </>
   );
