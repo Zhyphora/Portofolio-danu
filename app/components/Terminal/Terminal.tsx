@@ -6,6 +6,7 @@ import React, {
   useRef,
   FormEvent,
   KeyboardEvent,
+  useCallback,
 } from "react";
 import { motion } from "framer-motion";
 import Linkify from "react-linkify"; // For detecting and making links clickable
@@ -32,12 +33,92 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [showFullTerminal, setShowFullTerminal] = useState(false);
   const [initialMessageComplete, setInitialMessageComplete] = useState(false);
-  const [commandHistory, setCommandHistory] = useState<string[]>([]); // Store command history
-  const [historyIndex, setHistoryIndex] = useState<number>(-1); // Track current position in history
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const inputRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
-  const outputRef = useRef<HTMLPreElement | null>(null); // Correct type for <pre>
-  // Change to HTMLDivElement
+  const outputRef = useRef<HTMLPreElement | null>(null);
+
+  const simulateTyping = useCallback(
+    (text: string, speed: number, callback: () => void) => {
+      let index = 0;
+      let currentLine = "";
+
+      const interval = setInterval(() => {
+        if (index < text.length) {
+          currentLine += text[index];
+          setHistory((prev) => [
+            ...prev.slice(0, -1),
+            { type: "output", content: currentLine },
+          ]);
+          index++;
+
+          if (outputRef.current) {
+            outputRef.current.scrollIntoView({
+              behavior: "smooth",
+              block: "end",
+            });
+            moveCaretToEnd(outputRef.current);
+          }
+        } else {
+          clearInterval(interval);
+          callback();
+        }
+      }, speed);
+    },
+    []
+  );
+
+  // Combined initial message and banner effect
+  useEffect(() => {
+    const showInitialMessage = () => {
+      setIsTyping(true);
+      let index = 0;
+      let currentLine = "";
+
+      const interval = setInterval(() => {
+        if (index < initialMessage.length) {
+          currentLine += initialMessage[index];
+          setHistory([{ type: "output", content: currentLine }]);
+          index++;
+        } else {
+          clearInterval(interval);
+          setIsTyping(false);
+          setInitialMessageComplete(true);
+
+          // Show banner after delay
+          setTimeout(() => {
+            setShowFullTerminal(true);
+            setHistory([]);
+
+            // Show banner
+            let bannerIndex = 0;
+            let bannerLine = "";
+            setIsTyping(true);
+
+            const bannerInterval = setInterval(() => {
+              if (bannerIndex < banner.length) {
+                bannerLine += banner[bannerIndex];
+                setHistory([{ type: "output", content: bannerLine }]);
+                bannerIndex++;
+              } else {
+                clearInterval(bannerInterval);
+                setIsTyping(false);
+                if (onBannerComplete) {
+                  onBannerComplete();
+                }
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                }
+              }
+            }, 5);
+          }, 1000);
+        }
+      }, 10);
+    };
+
+    showInitialMessage();
+  }, []); // Only run once on mount
 
   const handleInput = (e: FormEvent<HTMLDivElement>) => {
     setTerminalInput(e.currentTarget.textContent || "");
@@ -132,50 +213,6 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
     });
   };
 
-  const simulateTyping = (
-    text: string,
-    speed: number,
-    callback: () => void
-  ) => {
-    let index = 0;
-    let currentLine = "";
-
-    const interval = setInterval(() => {
-      if (index < text.length) {
-        currentLine += text[index];
-        setHistory((prev) => [
-          ...prev.slice(0, -1),
-          { type: "output", content: currentLine },
-        ]);
-        index++;
-
-        // Move caret to the end of the output
-        if (outputRef.current) {
-          outputRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "end",
-          });
-          moveCaretToEnd(outputRef.current);
-        }
-      } else {
-        clearInterval(interval);
-        callback();
-      }
-    }, speed);
-  };
-
-  useEffect(() => {
-    setIsTyping(true);
-    simulateTyping(initialMessage, 10, () => {
-      setIsTyping(false);
-      setInitialMessageComplete(true);
-      setTimeout(() => {
-        setShowFullTerminal(true);
-        clearHistoryAndShowBanner();
-      }, 1000);
-    });
-  }, []);
-
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
@@ -192,18 +229,6 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  };
-
-  const clearHistoryAndShowBanner = () => {
-    setHistory([]);
-    setIsTyping(true);
-    simulateTyping(banner, 5, () => {
-      setIsTyping(false);
-      focusInput();
-      if (onBannerComplete) {
-        onBannerComplete(); // Notify when banner typing is complete
-      }
-    });
   };
 
   if (!initialMessageComplete) {
