@@ -125,22 +125,21 @@ const TetrisAnimation = () => {
       }
     };
 
-    // Initial update
     updateDimensions();
 
-    // Create ResizeObserver for continuous monitoring
+    // Store ref value
+    const currentRef = containerRef.current;
     const resizeObserver = new ResizeObserver(() => {
       requestAnimationFrame(updateDimensions);
     });
 
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
+    if (currentRef) {
+      resizeObserver.observe(currentRef);
     }
 
-    // Cleanup
     return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current);
+      if (currentRef) {
+        resizeObserver.unobserve(currentRef);
       }
     };
   }, []);
@@ -534,7 +533,7 @@ export default function Projects() {
         <div>
           <h2 className="text-3xl font-bold">Projects</h2>
           <p className="text-lg mt-2 text-slate-400">
-            Here are some projects I've built.
+            Here are some projects I&apos;ve built.
           </p>
         </div>
       </div>
