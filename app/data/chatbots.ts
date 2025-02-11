@@ -10,7 +10,7 @@ export const predefinedQuestions: Question[] = [
   {
     question: "How can I approach Mr. Naufal?",
     answer:
-      "You can contact Mr. Naufal by email at naufal@example.com or schedule an appointment through our online booking system.",
+      "You can contact Mr. Naufal by email at naufalsyarif.work@gmail.com",
   },
   {
     question: "What are your business hours?",
@@ -20,12 +20,12 @@ export const predefinedQuestions: Question[] = [
   {
     question: "Can you tell me about your services?",
     answer:
-      "We offer a wide range of services including consulting, project management, and software development. Would you like more information about a specific service?",
+      "We offer a wide range of services including consulting, project management, and software development.",
   },
   {
     question: "Do you offer remote consultations?",
     answer:
-      "Yes, we offer remote consultations via video conferencing. You can book a remote session through our online scheduling system.",
+      "Yes, we offer remote consultations via video conferencing. You can book email naufalsyarif.work@gmail.com for further conversations.",
   },
   {
     question: "What's your refund policy?",

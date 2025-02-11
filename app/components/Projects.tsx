@@ -384,6 +384,13 @@ const ProjectItem = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const formatDate = (date: Date | string) => {
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+    }).format(new Date(date));
+  };
+
   return (
     <>
       <div
@@ -392,13 +399,11 @@ const ProjectItem = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative w-full h-64 overflow-hidden border-2 border-[#273344] bg-[#131821]/80 backdrop-blur-md">
+        <div className="relative w-full h-64 overflow-hidden border-2 border-[#273344] bg-[#131821]/80 backdrop-blur-md group-hover:border-[#FFA23E] transition-colors">
           <div className="flex h-full flex-col md:flex-row">
             {/* Content Section */}
             <div className="w-full md:w-1/2 p-6">
-              <h3 className="text-2xl font-bold text-white group-hover:text-[#FFA23E] transition-colors">
-                {project.title}
-              </h3>
+              <h3 className="text-2xl font-bold text-white">{project.title}</h3>
             </div>
 
             {/* Animation Section */}
