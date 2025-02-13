@@ -51,7 +51,7 @@ export const handleCommand = async (command: string): Promise<string> => {
       break;
     case "social":
       output =
-        "LinkedIn: https://linkedin.com/in/naufal\nGitHub: https://github.com/naufal";
+        "LinkedIn: https://linkedin.com/in/naufalsyarif\nGitHub: https://github.com/palsarip";
       break;
     case "clear":
       return ""; // Clear command is handled separately in the component
