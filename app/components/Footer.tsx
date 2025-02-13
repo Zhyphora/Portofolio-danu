@@ -21,17 +21,17 @@ const navItems: NavItem[] = [
 ];
 
 const socialItems: SocialItem[] = [
-  { name: "GitHub", href: "https://github.com/yourusername", icon: FaGithub },
+  { name: "GitHub", href: "https://github.com/palsarip", icon: FaGithub },
   {
     name: "LinkedIn",
-    href: "https://linkedin.com/in/yourusername",
+    href: "https://linkedin.com/in/naufalsyarif",
     icon: FaLinkedin,
   },
-  {
-    name: "Twitter",
-    href: "https://twitter.com/yourusername",
-    icon: FaTwitter,
-  },
+  // {
+  //   name: "Twitter",
+  //   href: "https://twitter.com/yourusername",
+  //   icon: FaTwitter,
+  // },
 ];
 
 export default function Footer() {
