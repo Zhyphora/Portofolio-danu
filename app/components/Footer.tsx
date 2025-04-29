@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
 ]
 
 const socialItems: SocialItem[] = [
-  { name: 'GitHub', href: 'https://github.com/palsarip', icon: FaGithub },
+  { name: 'GitHub', href: 'https://github.com/Dhanuwrdhn', icon: FaGithub },
   {
     name: 'LinkedIn',
     href: 'www.linkedin.com/in/dhanuwardhana',
