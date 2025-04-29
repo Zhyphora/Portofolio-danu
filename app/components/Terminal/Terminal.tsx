@@ -1,242 +1,223 @@
-"use client";
+'use client'
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  FormEvent,
-  KeyboardEvent,
-  useCallback,
-} from "react";
-import { motion } from "framer-motion";
-import Linkify from "react-linkify"; // For detecting and making links clickable
-import {
-  handleCommand,
-  banner,
-  initialMessage,
-  help,
-} from "../../data/commands"; // Import help for autocomplete
-import styles from "@/app/components/Terminal/Terminal.module.css";
+import styles from '@/app/components/Terminal/Terminal.module.css'
+import { motion } from 'framer-motion'
+import { FormEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
+import Linkify from 'react-linkify' // For detecting and making links clickable
+import { banner, handleCommand, help, initialMessage } from '../../data/commands' // Import help for autocomplete
 
 interface HistoryItem {
-  type: "prompt" | "output";
-  content: string;
+  type: 'prompt' | 'output'
+  content: string
 }
 
 interface TerminalProps {
-  onBannerComplete?: () => void;
+  onBannerComplete?: () => void
 }
 
 export default function Terminal({ onBannerComplete }: TerminalProps) {
-  const [terminalInput, setTerminalInput] = useState("");
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [showFullTerminal, setShowFullTerminal] = useState(false);
-  const [initialMessageComplete, setInitialMessageComplete] = useState(false);
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const [historyIndex, setHistoryIndex] = useState<number>(-1);
-  const inputRef = useRef<HTMLDivElement>(null);
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const outputRef = useRef<HTMLPreElement | null>(null);
+  const [terminalInput, setTerminalInput] = useState('')
+  const [history, setHistory] = useState<HistoryItem[]>([])
+  const [isTyping, setIsTyping] = useState(false)
+  const [showFullTerminal, setShowFullTerminal] = useState(false)
+  const [initialMessageComplete, setInitialMessageComplete] = useState(false)
+  const [commandHistory, setCommandHistory] = useState<string[]>([])
+  const [historyIndex, setHistoryIndex] = useState<number>(-1)
+  const inputRef = useRef<HTMLDivElement>(null)
+  const terminalRef = useRef<HTMLDivElement>(null)
+  const outputRef = useRef<HTMLPreElement | null>(null)
 
-  const simulateTyping = useCallback(
-    (text: string, speed: number, callback: () => void) => {
-      let index = 0;
-      let currentLine = "";
+  const simulateTyping = useCallback((text: string, speed: number, callback: () => void) => {
+    let index = 0
+    let currentLine = ''
 
-      const interval = setInterval(() => {
-        if (index < text.length) {
-          currentLine += text[index];
-          setHistory((prev) => [
-            ...prev.slice(0, -1),
-            { type: "output", content: currentLine },
-          ]);
-          index++;
+    const interval = setInterval(() => {
+      if (index < text.length) {
+        currentLine += text[index]
+        setHistory((prev) => [...prev.slice(0, -1), { type: 'output', content: currentLine }])
+        index++
 
-          if (outputRef.current) {
-            outputRef.current.scrollIntoView({
-              behavior: "smooth",
-              block: "end",
-            });
-            moveCaretToEnd(outputRef.current);
-          }
-        } else {
-          clearInterval(interval);
-          callback();
+        if (outputRef.current) {
+          outputRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'end',
+          })
+          moveCaretToEnd(outputRef.current)
         }
-      }, speed);
-    },
-    []
-  );
+      } else {
+        clearInterval(interval)
+        callback()
+      }
+    }, speed)
+  }, [])
 
   // Combined initial message and banner effect
   useEffect(() => {
     const showInitialMessage = () => {
-      setIsTyping(true);
-      let index = 0;
-      let currentLine = "";
+      setIsTyping(true)
+      let index = 0
+      let currentLine = ''
 
       const interval = setInterval(() => {
         if (index < initialMessage.length) {
-          currentLine += initialMessage[index];
-          setHistory([{ type: "output", content: currentLine }]);
-          index++;
+          currentLine += initialMessage[index]
+          setHistory([{ type: 'output', content: currentLine }])
+          index++
         } else {
-          clearInterval(interval);
-          setIsTyping(false);
-          setInitialMessageComplete(true);
+          clearInterval(interval)
+          setIsTyping(false)
+          setInitialMessageComplete(true)
 
           // Show banner after delay
           setTimeout(() => {
-            setShowFullTerminal(true);
-            setHistory([]);
+            setShowFullTerminal(true)
+            setHistory([])
 
             // Show banner
-            let bannerIndex = 0;
-            let bannerLine = "";
-            setIsTyping(true);
+            let bannerIndex = 0
+            let bannerLine = ''
+            setIsTyping(true)
 
             const bannerInterval = setInterval(() => {
               if (bannerIndex < banner.length) {
-                bannerLine += banner[bannerIndex];
-                setHistory([{ type: "output", content: bannerLine }]);
-                bannerIndex++;
+                bannerLine += banner[bannerIndex]
+                setHistory([{ type: 'output', content: bannerLine }])
+                bannerIndex++
               } else {
-                clearInterval(bannerInterval);
-                setIsTyping(false);
+                clearInterval(bannerInterval)
+                setIsTyping(false)
                 if (onBannerComplete) {
-                  onBannerComplete();
+                  onBannerComplete()
                 }
                 if (inputRef.current) {
-                  inputRef.current.focus();
+                  inputRef.current.focus()
                 }
               }
-            }, 5);
-          }, 1000);
+            }, 5)
+          }, 1000)
         }
-      }, 10);
-    };
+      }, 10)
+    }
 
-    showInitialMessage();
-  }, []); // Only run once on mount
+    showInitialMessage()
+  }, []) // Only run once on mount
 
   const handleInput = (e: FormEvent<HTMLDivElement>) => {
-    setTerminalInput(e.currentTarget.textContent || "");
-  };
+    setTerminalInput(e.currentTarget.textContent || '')
+  }
 
   const handleEnter = async (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      await executeCommand(terminalInput);
-      setTerminalInput("");
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      await executeCommand(terminalInput)
+      setTerminalInput('')
       if (inputRef.current) {
-        inputRef.current.textContent = "";
+        inputRef.current.textContent = ''
       }
     }
-  };
+  }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     // Command history navigation
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      e.preventDefault();
-      let newIndex = historyIndex;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault()
+      let newIndex = historyIndex
 
-      if (e.key === "ArrowUp" && newIndex < commandHistory.length - 1) {
-        newIndex += 1;
-      } else if (e.key === "ArrowDown" && newIndex > 0) {
-        newIndex -= 1;
+      if (e.key === 'ArrowUp' && newIndex < commandHistory.length - 1) {
+        newIndex += 1
+      } else if (e.key === 'ArrowDown' && newIndex > 0) {
+        newIndex -= 1
       }
 
       if (newIndex !== historyIndex) {
-        setHistoryIndex(newIndex);
-        const command =
-          commandHistory[commandHistory.length - 1 - newIndex] || "";
-        setTerminalInput(command);
+        setHistoryIndex(newIndex)
+        const command = commandHistory[commandHistory.length - 1 - newIndex] || ''
+        setTerminalInput(command)
         if (inputRef.current) {
-          inputRef.current.textContent = command;
-          moveCaretToEnd(inputRef.current); // Move caret to the end
+          inputRef.current.textContent = command
+          moveCaretToEnd(inputRef.current) // Move caret to the end
         }
       }
     }
 
     // Autocomplete on Tab
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const input = terminalInput.trim();
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const input = terminalInput.trim()
       if (input) {
-        const matchedCommand = help.find((cmd) => cmd.startsWith(input));
+        const matchedCommand = help.find((cmd) => cmd.startsWith(input))
         if (matchedCommand) {
-          setTerminalInput(matchedCommand);
+          setTerminalInput(matchedCommand)
           if (inputRef.current) {
-            inputRef.current.textContent = matchedCommand;
-            moveCaretToEnd(inputRef.current); // Move caret to the end
+            inputRef.current.textContent = matchedCommand
+            moveCaretToEnd(inputRef.current) // Move caret to the end
           }
         }
       }
     }
-  };
+  }
 
   // Helper function to move the caret to the end of the content
   const moveCaretToEnd = (element: HTMLElement) => {
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.selectNodeContents(element);
-    range.collapse(false); // Move caret to the end
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-  };
+    const range = document.createRange()
+    const selection = window.getSelection()
+    range.selectNodeContents(element)
+    range.collapse(false) // Move caret to the end
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+  }
 
   const executeCommand = async (command: string) => {
-    if (isTyping) return; // Prevent multiple commands at once
+    if (isTyping) return // Prevent multiple commands at once
 
-    if (command.trim() === "clear") {
-      setHistory([]);
-      return;
+    if (command.trim() === 'clear') {
+      setHistory([])
+      return
     }
 
     // Add command to history
-    setCommandHistory((prev) => [...prev, command]);
-    setHistoryIndex(-1); // Reset history index after executing a new command
+    setCommandHistory((prev) => [...prev, command])
+    setHistoryIndex(-1) // Reset history index after executing a new command
 
-    const output = await handleCommand(command); // Await the handleCommand function
+    const output = await handleCommand(command) // Await the handleCommand function
 
     // Simulate typing animation
-    setIsTyping(true);
+    setIsTyping(true)
     setHistory((prev) => [
       ...prev,
-      { type: "prompt", content: `visitor@naufal.me:~$ ${command}` }, // Add the command to history as prompt
-      { type: "output", content: "" }, // Start with empty output
-    ]);
+      { type: 'prompt', content: `visitor@Danu.me:~$ ${command}` }, // Add the command to history as prompt
+      { type: 'output', content: '' }, // Start with empty output
+    ])
 
     simulateTyping(output, 10, () => {
-      setIsTyping(false); // End typing state
-    });
-  };
+      setIsTyping(false) // End typing state
+    })
+  }
 
   useEffect(() => {
     if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
     }
-  }, [history]);
+  }, [history])
 
   useEffect(() => {
     if (!isTyping && showFullTerminal) {
-      focusInput();
+      focusInput()
     }
-  }, [isTyping, showFullTerminal]);
+  }, [isTyping, showFullTerminal])
 
   const focusInput = () => {
     if (inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  };
+  }
 
   if (!initialMessageComplete) {
     return (
       <div className="text-white">
-        <pre className="whitespace-pre-wrap">{history[0]?.content || ""}</pre>
+        <pre className="whitespace-pre-wrap">{history[0]?.content || ''}</pre>
       </div>
-    );
+    )
   }
 
   return (
@@ -246,7 +227,7 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
         opacity: showFullTerminal ? 1 : 0,
         scale: showFullTerminal ? 1 : 0.95,
       }}
-      transition={{ duration: 1, ease: "easeInOut" }}
+      transition={{ duration: 1, ease: 'easeInOut' }}
       className="w-full max-w-full p-4 bg-[#131821] border-[2px] border-[#273344] text-slate-200 rounded-xl font-mono text-md"
       onClick={focusInput}
     >
@@ -256,23 +237,15 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
           <div className="w-3 h-3 bg-[#FFBE2F] rounded-full"></div>
           <div className="w-3 h-3 bg-[#29CE42] rounded-full"></div>
         </div>
-        <div className="w-full flex items-center justify-center mb-4">
-          visitor@naufal.me:~$
-        </div>
-        <div
-          className="terminal overflow-x-auto"
-          ref={terminalRef}
-          style={{ maxWidth: "100%" }}
-        >
+        <div className="w-full flex items-center justify-center mb-4">visitor@Danu.me:~$</div>
+        <div className="terminal overflow-x-auto" ref={terminalRef} style={{ maxWidth: '100%' }}>
           <div className={`${styles.terminalOutput} ${styles.scrollbar}`}>
             {history.map((item, index) => (
               <div
                 key={index}
-                className={`pb-2 ${
-                  item.type === "output" ? "pl-4" : "text-[#FFA23E]"
-                }`}
+                className={`pb-2 ${item.type === 'output' ? 'pl-4' : 'text-[#FFA23E]'}`}
               >
-                {item.type === "output" ? (
+                {item.type === 'output' ? (
                   <Linkify
                     componentDecorator={(decoratedHref, decoratedText, key) => (
                       <a
@@ -280,8 +253,8 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
-                          color: "#FFA23E",
-                          textDecoration: "underline",
+                          color: '#FFA23E',
+                          textDecoration: 'underline',
                         }}
                       >
                         {decoratedText}
@@ -296,29 +269,25 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
                     </pre>
                   </Linkify>
                 ) : (
-                  item.content
-                    .split("\n")
-                    .map((line, i) => <div key={i}>{line}</div>)
+                  item.content.split('\n').map((line, i) => <div key={i}>{line}</div>)
                 )}
               </div>
             ))}
             {!isTyping && (
               <div className="flex items-center">
-                <span className="mr-1 text-[#FFA23E]">
-                  visitor@naufal.me:~$
-                </span>
+                <span className="mr-1 text-[#FFA23E]">visitor@Danu.me:~$</span>
                 <div
                   ref={inputRef}
                   contentEditable={!isTyping}
                   className={`terminal-input bg-transparent text-slate-200 border-none outline-none resize-none font-mono h-6 caret-transparent focus:ring-0 focus:outline-none w-auto min-w-[10px] whitespace-pre-wrap ${
-                    isTyping ? "opacity-50 cursor-not-allowed" : ""
+                    isTyping ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   onInput={handleInput}
                   onKeyDown={(e) => {
-                    handleEnter(e);
-                    handleKeyDown(e);
+                    handleEnter(e)
+                    handleKeyDown(e)
                   }}
-                  style={{ display: "inline-block" }}
+                  style={{ display: 'inline-block' }}
                   spellCheck={false}
                 />
                 <div className="w-2 h-4 bg-[#C5C5C5] inline-block ml-1 animate-pulse"></div>
@@ -328,5 +297,5 @@ export default function Terminal({ onBannerComplete }: TerminalProps) {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

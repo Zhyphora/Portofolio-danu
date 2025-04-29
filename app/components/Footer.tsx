@@ -1,30 +1,30 @@
-import Link from "next/link";
-import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
-import { IconType } from "react-icons";
+import Link from 'next/link'
+import { IconType } from 'react-icons'
+import { FaGithub, FaLinkedin } from 'react-icons/fa'
 
 type NavItem = {
-  name: string;
-  href: string;
-};
+  name: string
+  href: string
+}
 
 type SocialItem = {
-  name: string;
-  href: string;
-  icon: IconType;
-};
+  name: string
+  href: string
+  icon: IconType
+}
 
 const navItems: NavItem[] = [
   //   { name: "Home", href: "/" },
   //   { name: "About", href: "/about" },
   //   { name: "Experiences", href: "/experiences" },
   //   { name: "Projects", href: "/projects" },
-];
+]
 
 const socialItems: SocialItem[] = [
-  { name: "GitHub", href: "https://github.com/palsarip", icon: FaGithub },
+  { name: 'GitHub', href: 'https://github.com/palsarip', icon: FaGithub },
   {
-    name: "LinkedIn",
-    href: "https://linkedin.com/in/naufalsyarif",
+    name: 'LinkedIn',
+    href: 'www.linkedin.com/in/dhanuwardhana',
     icon: FaLinkedin,
   },
   // {
@@ -32,17 +32,17 @@ const socialItems: SocialItem[] = [
   //   href: "https://twitter.com/yourusername",
   //   icon: FaTwitter,
   // },
-];
+]
 
 export default function Footer() {
-  const hasNavItems = navItems.length > 0;
+  const hasNavItems = navItems.length > 0
 
   return (
     <footer className="bg-transparent text-white">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div
           className={`flex flex-col ${
-            hasNavItems ? "md:flex-row justify-between" : "justify-center"
+            hasNavItems ? 'md:flex-row justify-between' : 'justify-center'
           } items-center`}
         >
           {hasNavItems && (
@@ -58,7 +58,7 @@ export default function Footer() {
               ))}
             </nav>
           )}
-          <div className={`flex space-x-6 ${!hasNavItems && "mt-4"}`}>
+          <div className={`flex space-x-6 ${!hasNavItems && 'mt-4'}`}>
             {socialItems.map((item) => (
               <a
                 key={item.name}
@@ -74,9 +74,9 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 text-center text-gray-400">
-          © {new Date().getFullYear()} Naufal Syarif. All rights reserved.
+          © {new Date().getFullYear()} Syahrial Danu . All rights reserved.
         </div>
       </div>
     </footer>
-  );
+  )
 }

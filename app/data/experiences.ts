@@ -1,62 +1,57 @@
 // experiences.ts
 export type Experience = {
-  id: number;
-  title: string;
-  company: string;
-  date: string;
-  description: string;
-  skills?: { id: number; title: string }[];
-  type: "work" | "education";
-};
+  id: number
+  title: string
+  company: string
+  date: string
+  description: string
+  skills?: { id: number; title: string }[]
+  type: 'work' | 'education'
+}
 
 export const experiences: Experience[] = [
   {
     id: 1,
-    title: "IT Intern",
-    company: "PT Karya Solusi Prima Sejahtera",
-    date: "Sept 2024 - Present",
+    title: 'IT Intern Mobile Developer',
+    company: 'PT Media Kreasi Abadi',
+    date: 'Feb 2022 - Jul 2022',
     description:
-      "Contributing to the development of a scalable Human Resource Information System (HRIS) web application using Laravel and PHP. Responsible for implementing core features, optimizing database queries, and ensuring a seamless user experience.",
+      'Developed EduFams, a mobile application serving the Balikpapan community, from initial development to successful PlayStore publication. Gained hands-on experience in the complete mobile app development lifecycle, including requirement analysis, development, testing, and deployment. Utilized Agile methodology with Kanban for efficient project management.',
     skills: [
-      { id: 1, title: "PHP" },
-      { id: 2, title: "Laravel" },
-      { id: 3, title: "Docker" },
+      { id: 1, title: 'Android Studio' },
+      { id: 2, title: 'Kotlin' },
+      { id: 3, title: 'Kanban' },
     ],
-    type: "work",
+    type: 'work',
   },
   {
     id: 2,
-    title: "Remote AI Trainer for Indonesian Writers",
-    company: "Outlier",
-    date: "Sept 2024 - Present",
+    title: 'Technical Consultant',
+    company: 'PT Global Information Technology',
+    date: 'Dec 2023 - Present',
     description:
-      "Providing high-quality training data for AI models by curating, reviewing, and refining prompts to improve language generation and contextual accuracy.",
-    skills: [{ id: 1, title: "Prompt Engineering" }],
-    type: "work",
+      'Tech Lead managing six key projects: Estatement (motorcycle parts management system), Kejar Tugas (internal project management tool), AI-powered Grafana monitoring system, Tukerin (C2C marketplace MVP), and two ongoing AI initiatives - a customer service chatbot and OCR system. Demonstrated excellence in both technical leadership and hands-on development using Waterfall methodology.',
+    skills: [
+      { id: 1, title: 'Spring Boot' },
+      { id: 2, title: 'Laravel' },
+      { id: 3, title: 'React.js' },
+      { id: 4, title: 'React Native' },
+      { id: 5, title: 'Golang' },
+      { id: 6, title: 'Python' },
+      { id: 7, title: 'Grafana' },
+      { id: 8, title: 'AI Integration' },
+      { id: 9, title: 'Faiss' },
+      { id: 10, title: 'Tech Leadership' },
+    ],
+    type: 'work',
   },
   {
     id: 3,
-    title: "Technical Consultant",
-    company: "PT Global Information Technology",
-    date: "Jan - July 2024",
+    title: 'Bachelor’s Degree in Informatics',
+    company: 'Universitas Multimedia Nusantara',
+    date: 'Aug 2021 - Present',
     description:
-      "Worked as a frontend developer specializing in NextJS to build interactive user interfaces. Assisted in IT operations, security implementation, and Splunk-based monitoring solutions.",
-    skills: [
-      { id: 1, title: "Splunk" },
-      { id: 2, title: "IT Operations" },
-      { id: 3, title: "IT Security" },
-      { id: 4, title: "Next.js" },
-      { id: 5, title: "META Development" },
-    ],
-    type: "work",
+      'Pursuing a degree in Informatics, with a focus on algorithms, data structures, software engineering, and cybersecurity. Engaged in various projects involving web development, machine learning, and IT security.',
+    type: 'education',
   },
-  {
-    id: 4,
-    title: "Bachelor’s Degree in Informatics",
-    company: "Universitas Multimedia Nusantara",
-    date: "Aug 2021 - Present",
-    description:
-      "Pursuing a degree in Informatics, with a focus on algorithms, data structures, software engineering, and cybersecurity. Engaged in various projects involving web development, machine learning, and IT security.",
-    type: "education",
-  },
-];
+]
