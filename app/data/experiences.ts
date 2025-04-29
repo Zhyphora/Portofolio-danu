@@ -11,25 +11,6 @@ export type Experience = {
 
 export const experiences: Experience[] = [
   {
-    id: 1,
-    title: 'IT Intern Mobile Developer',
-    company: 'PT Media Kreasi Abadi',
-    date: 'Feb 2022 - Jul 2022',
-    description: `Developed EduFams, a mobile application serving the Balikpapan community,
-from initial development to successful PlayStore publication.
-
-Gained hands-on experience in the complete mobile app development lifecycle,
-including requirement analysis, development, testing, and deployment.
-
-Utilized Agile methodology with Kanban for efficient project management.`,
-    skills: [
-      { id: 1, title: 'Android Studio' },
-      { id: 2, title: 'Kotlin' },
-      { id: 3, title: 'Kanban' },
-    ],
-    type: 'work',
-  },
-  {
     id: 2,
     title: 'Technical Consultant',
     company: 'PT Global Information Technology',
@@ -55,6 +36,25 @@ using Waterfall methodology.`,
       { id: 8, title: 'AI Integration' },
       { id: 9, title: 'Faiss' },
       { id: 10, title: 'Tech Leadership' },
+    ],
+    type: 'work',
+  },
+  {
+    id: 1,
+    title: 'IT Intern Mobile Developer',
+    company: 'PT Media Kreasi Abadi',
+    date: 'Feb 2022 - Jul 2022',
+    description: `Developed EduFams, a mobile application serving the Balikpapan community,
+from initial development to successful PlayStore publication.
+
+Gained hands-on experience in the complete mobile app development lifecycle,
+including requirement analysis, development, testing, and deployment.
+
+Utilized Agile methodology with Kanban for efficient project management.`,
+    skills: [
+      { id: 1, title: 'Android Studio' },
+      { id: 2, title: 'Kotlin' },
+      { id: 3, title: 'Kanban' },
     ],
     type: 'work',
   },
