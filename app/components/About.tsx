@@ -1,32 +1,32 @@
 // About.tsx
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { motion } from "framer-motion";
-import { aboutData } from "@/app/data/about";
-import type { About } from "@/app/data/about"; // Change to type-only import
-import { Skeleton } from "@/components/ui/skeleton";
+import type { About } from '@/app/data/about' // Change to type-only import
+import { aboutData } from '@/app/data/about'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { HiOutlineExclamationCircle } from 'react-icons/hi'
 
 export default function About() {
-  const [aboutMe, setAboutMe] = useState<About[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [aboutMe, setAboutMe] = useState<About[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Simulate fetching data from an API
   useEffect(() => {
     const fetchData = async () => {
       // Simulate a delay for API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       // Set the data (simulating API response)
-      setAboutMe(aboutData);
-      setLoading(false);
-    };
+      setAboutMe(aboutData)
+      setLoading(false)
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   if (loading) {
     return (
@@ -47,7 +47,7 @@ export default function About() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -101,10 +101,16 @@ export default function About() {
             asChild
             className="rounded-full bg-[#273344] hover:bg-[#354459] text-white font-medium px-6 py-2 transition-all duration-300 hover:scale-105"
           >
-            <Link href="#">Download CV</Link>
+            <Link
+              href="/cv/Syahrial Danu Wardhana-resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Download CV
+            </Link>
           </Button>
         </motion.div>
       </div>
     </motion.div>
-  );
+  )
 }
