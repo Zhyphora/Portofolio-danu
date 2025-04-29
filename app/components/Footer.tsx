@@ -24,7 +24,7 @@ const socialItems: SocialItem[] = [
   { name: 'GitHub', href: 'https://github.com/Dhanuwrdhn', icon: FaGithub },
   {
     name: 'LinkedIn',
-    href: 'www.linkedin.com/in/dhanuwardhana',
+    href: 'https://www.linkedin.com/in/dhanuwardhana',
     icon: FaLinkedin,
   },
   // {
@@ -74,7 +74,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 text-center text-gray-400">
-          © {new Date().getFullYear()} Syahrial Danu . All rights reserved.
+          © {new Date().getFullYear()} Syahrial Danu. All rights reserved.
         </div>
       </div>
     </footer>
