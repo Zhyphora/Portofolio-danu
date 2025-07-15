@@ -175,7 +175,7 @@ Project ini menggunakan MIT License. Lihat file `LICENSE` untuk detail.
 
 - 🌐 Portfolio: [Link Portfolio](https://portofolio-danu-mocha.vercel.app)
 - 💼 LinkedIn: [Syahrial Danu Wardhana](https://www.linkedin.com/in/dhanuwardhana/)
-- 📧 Email: your.email@example.com
+- 📧 Email: Dhanuwardhan.work@gmail.com
 - 🐙 GitHub: [@Zhyphora](https://github.com/Zhyphora)
 
 ---
